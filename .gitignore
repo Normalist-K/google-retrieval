@@ -1,3 +1,16 @@
+split/
+split-30/
+data/
+output/
+wandb/
+__pycache__/
+.vscode/
+lightning_logs
+outputs/
+pl_output/
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
