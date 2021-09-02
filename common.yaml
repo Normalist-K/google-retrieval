@@ -1,5 +1,5 @@
 defaults:
-  - config: delg
+  - config: cgd
 
 # ETC
 seed: 42
@@ -7,22 +7,22 @@ num_workers: 8
 wandb_logger: true
 project: GLD2021
 lr_finder: false
-checkpoint_dir: '/root/kaggle/google-retrieval/pl_output'
+checkpoint_dir: /root/kaggle/google-retrieval/pl_output
 gpus: 1
 precision: 16
 
 # Dataset
 data_root: /shared/lorenzo/data-gld
-split_df_root: '/root/kaggle/google-retrieval/split'
-img_size: 512
+split_df_root: /root/kaggle/google-retrieval/split
+img_size: 224
 num_classes: 81313
 aug: true
 fold_no: 0
 
 # Training
 max_epochs: 25
-batch_size: 32
-lr: 1e-3
+batch_size: 128
+lr: 1e-4
 lr_scheduler: false
-optimizer: adamw
+optimizer: adam
 es_patience: null

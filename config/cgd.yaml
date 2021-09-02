@@ -1,0 +1,8 @@
+# @package _global_
+model_name : cgd
+backbone_name : resnet50 # choices = [resnet50 / resnext50]
+gd_config : SG # choices = ['S', 'M', 'G', 'SM', 'MS', 'SG', 'GS', 'MG', 'GM', 'SMG', 'MSG', 'GSM']
+feature_dim : 1536
+smoothing : 0.1
+temperature : 0.5
+margin : 0.1

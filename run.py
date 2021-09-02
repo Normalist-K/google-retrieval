@@ -6,12 +6,13 @@ import hydra
 import pytorch_lightning as pl
 
 # from model.delg import LitDELG
+from model.cgd import LitCGD
 
 @hydra.main(config_path='.', config_name='common')
 def run(config):
     if config.model_name == 'delg':
         # model = LitDELG(config)
-        pass
+        model = LitCGD(config)
 
     if config.wandb_logger:
         from pytorch_lightning.loggers import WandbLogger

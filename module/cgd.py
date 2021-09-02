@@ -2,11 +2,10 @@
 Reference: https://github.com/leftthomas/CGD/blob/master/model.py
 """
 import torch
-from torch._C import JITException
 import torch.nn as nn
 import torch.nn.functional as F
 
-from resnet import resnet50, resnext50_32x4d
+from module.resnet import resnet50, resnext50_32x4d
 
 
 def set_bn_eval(m):
