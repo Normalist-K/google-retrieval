@@ -2,6 +2,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
 import hydra
+from omegaconf import DictConfig, OmegaConf
 
 import pytorch_lightning as pl
 
@@ -10,14 +11,15 @@ from model.cgd import LitCGD
 
 @hydra.main(config_path='.', config_name='common')
 def run(config):
-    if config.model_name == 'delg':
-        # model = LitDELG(config)
+    print(OmegaConf.to_yaml(config))
+
+    if config.model_name == 'cgd':
         model = LitCGD(config)
 
     if config.wandb_logger:
         from pytorch_lightning.loggers import WandbLogger
         logger = WandbLogger(
-            entity='monet-kaggle',
+            entity='normalkim',
             project=config.project,
             name=config.backbone_name,
             config=config,
@@ -42,8 +44,8 @@ def run(config):
         ))
     callbacks.append(ModelCheckpoint(
         dirpath=config.checkpoint_dir,
-        filename=f"{config.backbone_name}-"+"{epoch:02d}"+
-        f"fold{config.fold_no}-"+"{val_loss:4.f}",
+        filename=f"{config.backbone_name}-"+"{epoch:02d}-" +
+        f"fold{config.fold_no}-"+"{val_loss:.4f}",
         monitor='val_loss',
         mode='min'
     ))
@@ -54,7 +56,7 @@ def run(config):
         gradient_clip_val=0.5,
         deterministic=True,
         val_check_interval=8000,
-        gpus=3,
+        gpus=config.gpus,
         max_epochs=config.max_epochs,
         weights_summary='top',
         logger=logger,

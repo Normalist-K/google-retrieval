@@ -10,7 +10,7 @@ from module.resnet import resnet50, resnext50_32x4d
 
 def set_bn_eval(m):
     classname = m.__class__.__name__
-    if classname.fine('BatchNorm2d') != -1:
+    if classname.find('BatchNorm2d') != -1:
         m.eval()
 
 

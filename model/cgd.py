@@ -28,7 +28,7 @@ class LitCGD(pl.LightningModule):
             self.learning_rate = config.lr
 
         self.model = CGD(config.backbone_name, config.gd_config, config.feature_dim, config.num_classes)
-        flops, params = profile(self.model, inputs=(torch.randn(1, 3, 224, 224).cuda(),))
+        flops, params = profile(self.model, inputs=(torch.randn(1, 3, 224, 224),))
         flops, params = clever_format([flops, params])
         print(f"# Model Params: {params} FLOPs: {flops}")
 
@@ -70,9 +70,9 @@ class LitCGD(pl.LightningModule):
         ranking_loss = self.feature_criterion(features, targets)
         loss = class_loss + ranking_loss
 
-        self.log(f"{stage}_class_loss", class_loss, on_step=False, on_epoch=True, sync_dist=True)
-        self.log(f"{stage}_ranking_loss", ranking_loss, on_step=False, on_epoch=True, sync_dist=True)
-        self.log(f"{stage}_loss", loss, on_step=False, on_epoch=True, sync_dist=True)
+        self.log(f"{stage}_class_loss", class_loss, on_step=True, on_epoch=True, sync_dist=True)
+        self.log(f"{stage}_ranking_loss", ranking_loss, on_step=True, on_epoch=True, sync_dist=True)
+        self.log(f"{stage}_loss", loss, on_step=True, on_epoch=True, sync_dist=True)
 
         pred = torch.argmax(classes, dim=-1)
         acc = torch.sum(pred==targets).item() / inputs.size(0) * 100
