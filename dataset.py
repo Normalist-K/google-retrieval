@@ -17,17 +17,17 @@ class GLDataset(datasets.VisionDataset):
         self.split = split
         self.seed = seed
 
-        label_map = dict(map(lambda x: (x[1], x[0]), enumerate(pd.read_csv(
+        self.label_map = dict(map(lambda x: (x[1], x[0]), enumerate(pd.read_csv(
             os.path.join(root, "train.csv"))["landmark_id"].unique())))
 
         if split == "train":
             df = pd.read_csv(os.path.join(
                 split_df_root, f"train_df_fold{fold_no}.csv"))
-            self.data = list(zip(df["id"], df["landmark_id"].map(label_map)))
+            self.data = list(zip(df["id"], df["landmark_id"].map(self.label_map)))
         elif split == "val":
             df = pd.read_csv(os.path.join(
                 split_df_root, f"val_df_fold{fold_no}.csv"))
-            self.data = list(zip(df["id"], df["landmark_id"].map(label_map)))
+            self.data = list(zip(df["id"], df["landmark_id"].map(self.label_map)))
         else:
             self.data = glob.glob(os.path.join(root, f"{split}/*/*/*/*.jpg"))
 
@@ -51,7 +51,7 @@ class GLDataset(datasets.VisionDataset):
         if self.split in ["train", "val"]:
             return img, target
         else:
-            return img
+            return img, path.split('/')[-1].replace(".jpg", "")
 
     def __len__(self):
         return len(self.data)

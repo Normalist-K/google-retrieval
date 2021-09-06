@@ -26,3 +26,7 @@ lr: 1e-4
 lr_scheduler: false
 optimizer: adam
 es_patience: null
+
+# saved model
+weight_path: /root/kaggle/google-retrieval/pl_output/resnet50-epoch=23-fold0-val_loss=3.8455.ckpt
+output_dir: /root/kaggle/google-retrieval/weight
