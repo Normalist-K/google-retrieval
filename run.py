@@ -1,3 +1,4 @@
+from pytorch_lightning.accelerators import accelerator
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
@@ -57,6 +58,7 @@ def run(config):
         deterministic=True,
         val_check_interval=8000,
         gpus=config.gpus,
+        accelerator='ddp',
         max_epochs=config.max_epochs,
         weights_summary='top',
         logger=logger,

@@ -135,3 +135,60 @@ class MPerClassSampler(Sampler):
             inds = inds[:self.batch_size]
             inds = np.random.permutation(inds)
             yield list(inds)
+
+def get_in_features(backbone, shallow=False):
+    if 'tf_efficientnetv2_m' in backbone:
+        in_features = 1280
+        if shallow:
+            return 512
+    elif 'tf_efficientnetv2_l' in backbone:
+        in_features = 1280
+        if shallow:
+            return 640
+    elif 'tf_efficientnetv2_s' in backbone:
+        in_features = 1280
+    elif 'cait_xxs24_384' in backbone:
+        in_features = 192
+    elif 'tf_efficientnet_b0' in backbone:
+        in_features = 1280
+    elif 'tf_efficientnet_b1' in backbone:
+        in_features = 1280
+    elif 'tf_efficientnet_b2' in backbone:
+        in_features = 1408
+    elif 'tf_efficientnet_b3' in backbone:
+        in_features = 1536
+    elif 'tf_efficientnet_b4' in backbone:
+        in_features = 1792
+    elif 'tf_efficientnet_b5' in backbone:
+        in_features = 2048
+    elif 'tf_efficientnet_b7' in backbone:
+        in_features = 2560
+    elif 'cait_m48_448' in backbone:
+        in_features = 768
+    elif "inception_v4" in backbone:
+        in_features = 1536
+    elif 'inception_resnet_v2' in backbone:
+        in_features = 1536
+    elif 'densenet169' in backbone:
+        in_features = 1664
+    elif 'vit' in backbone:
+        in_features = 768
+    elif 'swin_base_patch4_window7_224' in backbone:
+        in_features = 1024
+    elif 'swin_large_patch4_window12_384_in22k' in backbone:
+        in_features = 1536
+    else:
+        in_features = 2048
+
+    divider = 1
+    if shallow:
+        if "resnet" in backbone:
+            divider = 2
+        elif "resnest" in backbone:
+            divider = 2
+        elif "resnext" in backbone:
+            divider = 2
+        elif "efficientnet" in backbone:
+            divider = 4
+
+    return in_features // divider

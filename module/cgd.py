@@ -4,8 +4,10 @@ Reference: https://github.com/leftthomas/CGD/blob/master/model.py
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import timm
 
 from module.resnet import resnet50, resnext50_32x4d
+from module.utils import get_in_features
 
 
 def set_bn_eval(m):
@@ -43,17 +45,25 @@ class L2Norm(nn.Module):
 
 
 class CGD(nn.Module):
-    def __init__(self, backbone_type, gd_config, feature_dim, num_classes):
+    def __init__(self, config):
         super().__init__()
 
-        # Backbone Network
-        backbone = resnet50(pretrained=True) if backbone_type =='resnet50' else resnext50_32x4d(pretrained=True)
-        self.features = []
-        for name, module in backbone.named_children():
-            if isinstance(module, nn.AdaptiveAvgPool2d) or isinstance(module, nn.Linear):
-                continue
-            self.features.append(module)
-        self.features = nn.Sequential(*self.features)
+        self.backbone_name = config.backbone_name
+        gd_config = config.gd_config
+        feature_dim = config.feature_dim
+        num_classes = config.num_classes
+
+        # Get backbone
+        backbone = timm.create_model(
+            self.backbone_name,
+            pretrained=True,
+            num_classes=0,
+            global_pool='',
+        )
+
+        self.features = backbone
+        
+        in_features = get_in_features(self.backbone_name)
 
         # Main Module
         n = len(gd_config)
@@ -69,15 +79,15 @@ class CGD(nn.Module):
             else:
                 p = 3
             self.global_descriptors.append(GlobalDescriptor(p=p))
-            self.main_modules.append(nn.Sequential(nn.Linear(2048, k, bias=False), L2Norm()))
+            self.main_modules.append(nn.Sequential(nn.Linear(in_features, k, bias=False), L2Norm()))
         self.global_descriptors = nn.ModuleList(self.global_descriptors)
         self.main_modules = nn.ModuleList(self.main_modules)
 
 
         # Auxiliary Modules
         self.auxiliary_module = nn.Sequential(
-            nn.BatchNorm1d(2048),
-            nn.Linear(2048, num_classes, bias=True)
+            nn.BatchNorm1d(in_features),
+            nn.Linear(in_features, num_classes, bias=True)
         )
 
     def forward(self, x):

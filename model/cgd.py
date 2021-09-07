@@ -27,13 +27,15 @@ class LitCGD(pl.LightningModule):
         else:
             self.learning_rate = config.lr
 
-        self.model = CGD(config.backbone_name, config.gd_config, config.feature_dim, config.num_classes)
+        self.model = CGD(config)
         flops, params = profile(self.model, inputs=(torch.randn(1, 3, 224, 224),))
         flops, params = clever_format([flops, params])
         print(f"# Model Params: {params} FLOPs: {flops}")
 
         self.class_criterion = LabelSmoothingCrossEntropyLoss(smoothing=config.smoothing, temperature=config.temperature)
         self.feature_criterion = BatchHardTripletLoss(margin=config.margin)
+
+        self.lambda_a = config.lambda_a
 
     def setup(self, stage):
         if self.config.aug:
@@ -63,12 +65,12 @@ class LitCGD(pl.LightningModule):
         stage = 'train'
         inputs, targets = batch
 
-        self.model.apply(set_bn_eval)
+        # self.model.apply(set_bn_eval)
         
         features, classes = self.model(inputs)
         class_loss = self.class_criterion(classes, targets)
         ranking_loss = self.feature_criterion(features, targets)
-        loss = class_loss + ranking_loss
+        loss = class_loss * self.lambda_a + ranking_loss
 
         self.log(f"{stage}_class_loss", class_loss, on_step=True, on_epoch=True, sync_dist=True)
         self.log(f"{stage}_ranking_loss", ranking_loss, on_step=True, on_epoch=True, sync_dist=True)
@@ -84,13 +86,11 @@ class LitCGD(pl.LightningModule):
     def validation_step(self, batch, _):
         stage = 'val'
         inputs, targets = batch
-
-        self.model.apply(set_bn_eval)
         
         features, classes = self.model(inputs)
         class_loss = self.class_criterion(classes, targets)
         ranking_loss = self.feature_criterion(features, targets)
-        loss = class_loss + ranking_loss
+        loss = class_loss * self.lambda_a + ranking_loss
 
         self.log(f"{stage}_class_loss", class_loss, on_step=False, on_epoch=True, sync_dist=True)
         self.log(f"{stage}_ranking_loss", ranking_loss, on_step=False, on_epoch=True, sync_dist=True)
@@ -112,7 +112,7 @@ class LitCGD(pl.LightningModule):
         features, classes = self.model(inputs)
         class_loss = self.class_criterion(classes, targets)
         ranking_loss = self.feature_criterion(features, targets)
-        loss = class_loss + ranking_loss
+        loss = class_loss * self.lambda_a + ranking_loss
 
         return loss
 
